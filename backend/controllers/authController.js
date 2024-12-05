@@ -7,33 +7,36 @@ const SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 const TOKEN_EXPIRY = process.env.JWT_EXPIRY || "1h"; // Easily changeable token expiry
 
 // Password validation (at least 8 characters, at least 1 number, at least 1 capital letter)
-const passwordValidation = (password) => {
-  const regex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
-  return regex.test(password);
-};
+// const passwordValidation = (password) => {
+//   const regex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+//   return regex.test(password);
+// };
 
 // Signup
 exports.signup = async (req, res) => {
-  const { username, email, password, role = "user" } = req.body;
+  const { fullName, email, password, role = "user" } = req.body;
+  console.log("i have been able to sign up" + req.body)
+
 
   // Check if password meets the criteria
-  if (!passwordValidation(password)) {
-    return res.status(400).json({
-      error: "Password must be at least 8 characters long, include a number and a capital letter.",
-    });
-  }
+  // if (!passwordValidation(password)) {
+  //   return res.status(400).json({
+  //     error: "Password must be at least 8 characters long, include a number and a capital letter.",
+  //   });
+  // }
 
   try {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(fullName, email, hashedPassword, role)
 
     // Insert user data into DB
     await pool.execute(
-      `INSERT INTO Users 
+      `INSERT INTO users 
        (username, email, password, role, subscription_status, trial_end_date) 
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
-        username,
+        fullName,
         email,
         hashedPassword,
         role,
@@ -53,11 +56,11 @@ exports.registerServiceProvider = async (req, res) => {
   const { username, email, password, role, latitude, longitude } = req.body;
 
   // Check if password meets the criteria
-  if (!passwordValidation(password)) {
-    return res.status(400).json({
-      error: "Password must be at least 8 characters long, include a number and a capital letter.",
-    });
-  }
+  // if (!passwordValidation(password)) {
+  //   return res.status(400).json({
+  //     error: "Password must be at least 8 characters long, include a number and a capital letter.",
+  //   });
+  // }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -90,7 +93,7 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const [rows] = await pool.execute("SELECT * FROM Users WHERE email = ?", [email]);
+    const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [email]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "User not found" });
@@ -105,7 +108,8 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: user.id, role: user.role }, SECRET, { expiresIn: TOKEN_EXPIRY });
 
-    res.status(200).json({
+    res.cookie('accessToken',token,{maxAge:36000});
+    res.cookie('refreshToken',token,{maxAge:604800}).status(200).json({
       message: "Login successful",
       token,
       user: {

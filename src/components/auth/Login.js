@@ -24,7 +24,8 @@ const Login = () => {
         password,
       });
   
-      const { token, user } = response.data;
+      const { token, user} = response.data;
+      console.log(response.headers)
       document.cookie = `token=${token}; Secure; HttpOnly`;
       localStorage.setItem("user", JSON.stringify(user));
   
@@ -35,7 +36,7 @@ const Login = () => {
         mechanic: "/mechanic-dashboard",
       };
   
-      navigate(roleRedirects[user.role] || "/");
+    //  navigate(roleRedirects[user.role] || "/");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Please try again.");
     }

@@ -20,14 +20,15 @@ const SignUp = () => {
   };
 
   const handleSignUp = async (e) => {
+    console.log("i have been able to sign up")
     e.preventDefault();
     setError("");
   
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passwordRegex.test(formData.password)) {
-      setError("Password must be at least 8 characters long, include a number and a capital letter.");
-      return;
-    }
+    // const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    // if (!passwordRegex.test(formData.password)) {
+    //   setError("Password must be at least 8 characters long, include a number and a capital letter.");
+    //   return;
+    // }
   
     try {
       const payload = {
@@ -37,8 +38,20 @@ const SignUp = () => {
         ...(userType === "mechanic" && { specialization: formData.additionalInfo }),
       };
   
-      const response = await axios.post("http://localhost:5000/api/auth/signup", payload);
-      if (response.status === 201) navigate("/login");
+        axios.post("http://localhost:5000/api/auth/signup", payload)
+        .then((response) => {
+          console.log(response)
+          if (response.status === 201) navigate("/login");
+        })
+        .catch((err) => {
+          console.log(err)
+          setError(err.response?.data?.message || "An error occurred. Please try again.");
+        });
+
+      // const response = await axios.post("http://localhost:5000/api/auth/signup", payload);
+      //  response = await response.json()
+      // console.log(response)
+     // if (response.status === 201) navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred. Please try again.");
     }

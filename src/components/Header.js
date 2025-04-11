@@ -6,7 +6,6 @@ const Header = () => {
     <header className="bg-blue-600 p-6 flex justify-between items-center text-white shadow-md">
       <div className="flex items-center space-x-4">
         <img src={logo} alt="RAMITOW Logo" className="h-20 w-21" />
-        <h1 className="text-3xl font-bold">RAMITOW</h1>
       </div>
       <nav>
         <ul className="flex space-x-6 text-lg">
